@@ -1,0 +1,12 @@
+# complejidad orden jedi
+
+tiempo:
+
+O(n + n + r + n + r * log(r) + n) = O(n + r * log(r))
+
+tiempo alternativo si decidieramos solo computar F y luego ordenar todos los vertices:
+
+O(n + n + nlog(n)) = O(nlog(n))
+
+
+mientras mas cerca este r de n entonces mas conviene la segunda forma de implementarlo, pero en general es mejor usar mas memoria y ganar tiempo
