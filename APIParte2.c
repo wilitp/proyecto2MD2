@@ -5,7 +5,73 @@
 #include "APIG23.h"
 #include "APIParte2.h"
 
-u32 Greedy(Grafo G, u32 *Orden, u32 *Color) { return 0; }
+
+static int cmp(const void *v1, const void *v2) {
+  u32 vfirst = *((u32 *)v1);
+  u32 vsecond = *((u32 *)v2);
+  if (vfirst < vsecond) {
+    return -1;
+  } else if (vfirst == vsecond) {
+    return 0;
+  } else
+    return 1;
+}
+
+static u32 colorear(u32 v, Grafo G, u32 * Color){
+  //creemos la lista de colores que tiene cada vecino
+  if(Grado(v, G) == 0){
+    //no tiene vecinos
+    return 1;
+  }
+  u32 * color_vecinos = calloc(Grado(v, G), sizeof(u32));
+  if(color_vecinos == NULL){
+    return 0;
+  }
+  for(u32 index = 0; index<Grado(v, G); ++index){
+    color_vecinos[index] = Color[IndiceVecino(index, v, G)];
+  }
+  qsort(color_vecinos, Grado(v, G), sizeof(u32), cmp);
+  //busquemos el primer espacio libre, si no hay ningun coloreamos con un nuevo color xdnt
+  u32 color_actual = 0;
+  for(u32 index = 0; index<Grado(v, G); ++index){
+    if(color_vecinos[index] != 0){
+      if(color_actual+1 < color_vecinos[index]){  //si el color que estoy apuntando es por mas de 1 mayor al anterior pues tengo un hueco, osea mi primer colo dispobible
+        return color_actual+1;
+      }else{
+        color_actual = color_vecinos[index];
+      }
+    }    
+  }
+  //si terminamos es por que no habia hueco, necesitamos un nuevo color
+  return color_actual + 1;
+}
+// en Orden vienen especificados una serie de vertices ordenados a colorear. precon estan desde el 1 hasta n
+// en Color en el indice n-simo esta el color con el que se se coloreo el vertice n-simo del grafo (notar que no nos importan los nombres de los vertices)
+// si color en alguna posicion tiene el valor 0 significa que ese vertice no fue pintado aun
+u32 Greedy(Grafo G, u32 *Orden, u32 *Color) { 
+  u32 n = NumeroDeVertices(G);
+  //ya sabemos hasta donde ir coloreando en orden
+  for(u32 index = 0; index < n; ++index){
+    Color[index] = 0;
+  }
+  u32 max_color = 0;
+  for(u32 index = 0; index < n; ++index){
+    //cual vamos a ir coloreado:
+    u32 vertice_a_colorear = Orden[index];
+    //tenemos que colorer este vertice con el menor color posible que no tengan los vecinos
+    u32 nuevo_color = colorear(vertice_a_colorear, G, Color);
+
+    if(nuevo_color == 0){
+      //fallo colorear
+      return (2^32)-1;
+    }
+    if(nuevo_color > max_color){
+      max_color = nuevo_color;
+    }
+    Color[index] = nuevo_color;
+  }
+  return max_color;
+}
 
 u32 contarColores(u32 n, u32 *Color) {
 
@@ -109,6 +175,7 @@ char OrdenImparPar(u32 n, u32 *Orden, u32 *Color) {
   return '0';
 }
 
+
 // F definida en la spec para el orden jedi
 // Tuve que hacerla variable global porq qsort_r no esta permitida en c99 (y los
 // profes compilan con ese standard)
@@ -117,7 +184,7 @@ static u32 *F;
 // Comparador para ordenar V_i's en el orden Jedi
 // Asume que cuando se la llama F ya esta inicializada ya punta a un lugar de
 // memoria valido
-int compar(const void *v1, const void *v2) {
+static int compar(const void *v1, const void *v2) {
   u32 vfirst = *((u32 *)v1);
   u32 vsecond = *((u32 *)v2);
   if (F[vfirst] < F[vsecond]) {
@@ -127,6 +194,7 @@ int compar(const void *v1, const void *v2) {
   } else
     return 1;
 }
+
 
 // ordena indices en la forma especial dada en las especificaciones
 char OrdenJedi(Grafo G, u32 *Orden, u32 *Color) {
