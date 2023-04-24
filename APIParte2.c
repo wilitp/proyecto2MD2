@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "APIG23.h"
 #include "APIParte2.h"
@@ -40,7 +41,7 @@ struct ColorInfo *getColorInfo(u32 n, u32 *Color) {
   // cantidades Color -> Nat
   colorInfo->cantidades = malloc(colorInfo->colorc * sizeof(u32));
 
-  // Computamos F y las cantidades
+  // Computamos las cantidades
   for (u32 i = 0; i < n; ++i) {
     ++(colorInfo->cantidades[Color[i]]);
   }
@@ -58,6 +59,8 @@ struct ColorInfo *getColorInfo(u32 n, u32 *Color) {
     ++contadores[Color[i]];
   }
   // al final de esto debe cumplirse contadores = cantidades
+
+  free(contadores);
 
   return colorInfo;
 }
@@ -77,15 +80,25 @@ char OrdenImparPar(u32 n, u32 *Orden, u32 *Color) {
   struct ColorInfo *colorInfo = getColorInfo(n, Color);
 
   u32 k = 0;
+
+  u32 upperOdd;
+  u32 upperEven;
+  if(colorInfo->colorc % 2 == 0) {
+    upperOdd  = colorInfo->colorc - 1; 
+    upperEven = colorInfo->colorc - 2; 
+  } else {
+    upperEven = colorInfo->colorc - 1; 
+    upperOdd  = colorInfo->colorc - 2; 
+  }
   // Pongo los impares
-  for (u32 j = 1; j < colorInfo->colorc; j += 2) {
+  for (u32 j = upperOdd; 0 <= j && j < colorInfo->colorc; j -= 2) {
     for (u32 i = 0; i < colorInfo->cantidades[j]; ++i) {
       Orden[k] = colorInfo->V[j][i];
     }
   }
 
   // Pongo los pares
-  for (u32 j = 0; j < colorInfo->colorc; j += 2) {
+  for (u32 j = upperEven; 0 <= j && j < colorInfo->colorc; j -= 2) {
     for (u32 i = 0; i < colorInfo->cantidades[j]; ++i) {
       Orden[k] = colorInfo->V[j][i];
     }
