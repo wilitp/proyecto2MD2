@@ -1,12 +1,15 @@
+# complejidad getColorInfo
+
+O(n + r + n) = O(n)
+
 # complejidad orden jedi
 
 tiempo:
 
-O(n + n + r + n + r * log(r) + n) = O(n + r * log(r))
+O(n + n + r + rlog(r) + n + r) = O(n + rlog(r))
+colorInfo + computarF + initOrdenColores + ordenarColores + aplanarV + colorInfoDestroy
 
-tiempo alternativo si decidieramos solo computar F y luego ordenar todos los vertices:
+# complejidad orden impar par
 
-O(n + n + nlog(n)) = O(nlog(n))
-
-
-mientras mas cerca este r de n entonces mas conviene la segunda forma de implementarlo, pero en general es mejor usar mas memoria y ganar tiempo
+O(n + n + r) = O(n)
+colorInfo + aplanarV + colorInfoDestroy
