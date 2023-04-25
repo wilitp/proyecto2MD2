@@ -209,9 +209,13 @@ char OrdenJedi(Grafo G, u32 *Orden, u32 *Color) {
   // Funcion F de la spec
   F = calloc(colorInfo->colorc, sizeof(u32));
 
-  // Computamos F
+  // Computamos las sumatorias de F
   for (u32 i = 0; i < NumeroDeVertices(G); ++i) {
     F[Color[i]] += Grado(i, G);
+  }
+  // Computamos el x * sumatoria
+  for (u32 i = 0; i < colorInfo->colorc; ++i) {
+    F[i] *= Color[i];
   }
 
   // inicializo ordenColores
