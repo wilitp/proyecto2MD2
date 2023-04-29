@@ -1,5 +1,5 @@
 #include "stdio.h"
-#include "apig23.h"
+#include "APIG23.h"
 #include "APIParte2.h"
 int main()
 {
@@ -13,10 +13,16 @@ int main()
     }
     u32 colores_usados = Greedy(g, orden, color);
     printf("se usaron %u colores\n\n", colores_usados);
-
+    OrdenJedi(g, orden, color);
+    colores_usados = Greedy(g, orden, color);
+    printf("se usaron %u colores\n\n", colores_usados);
     // for(u32 i = 0; i<NumeroDeVertices(g); ++i){
-    //   printf("el vertice n° %u, se coloreo con %u\n", i+1,color[i]);
-    // } 
+    //   if(orden[i] >= NumeroDeVertices(g)) {
+    //     printf("troleaste mano: \n \t Vertice: %u\n \t Total: %u\n", orden[i], NumeroDeVertices(g));
+    //   }
+    // }
+    // colores_usados = Greedy(g, orden, color);
+    // printf("se usaron %u colores dsp de orden jedi\n\n", colores_usados);
     DestruirGrafo(g);
     return 0;
 }
