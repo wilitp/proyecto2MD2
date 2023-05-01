@@ -81,12 +81,14 @@ static u32 colorear(u32 v, Grafo G, u32 *Color) {
           color_vecinos[index]) { // si el color que estoy apuntando es por mas
                                   // de 1 mayor al anterior pues tengo un hueco,
                                   // osea mi primer colo dispobible
+        free(color_vecinos);
         return color_actual + 1;
       } else {
         color_actual = color_vecinos[index];
       }
     }
   }
+  free(color_vecinos);
   // si terminamos es por que no habia hueco, necesitamos un nuevo color
   return color_actual + 1;
 }
