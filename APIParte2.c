@@ -8,44 +8,44 @@
 
 #define MAX_COLOR __UINT32_MAX__
 //tomi
-// u32 Greedy(Grafo G, u32 *Orden, u32 *Color)
-// {
-//     u32 maxColors = 0;
-//     const u32 numVertices = NumeroDeVertices(G);
-//     // const u32* indices = Indices(G);
+ u32 Greedy(Grafo G, u32 *Orden, u32 *Color)
+ {
+     u32 maxColors = 0;
+     const u32 numVertices = NumeroDeVertices(G);
+     // const u32* indices = Indices(G);
 
-//     // Iteramos sobre cada uno de los vertices en el orden dado
-//     for(u32 i = 0; i < numVertices; i++) {
-//         Color[i] = MAX_COLOR;
-//     }
+     // Iteramos sobre cada uno de los vertices en el orden dado
+     for(u32 i = 0; i < numVertices; i++) {
+         Color[i] = MAX_COLOR;
+     }
 
-//     u32 *used_colors = calloc(numVertices, sizeof(u32));
-//     for (u32 i = 0; i < numVertices; i++) // O(3N^2) ~~ O(N^2)
-//     {
-//         u32 vertex = Orden[i];
-//         Color[vertex] = 0; // Inicializamos el color del vertice actual en 0 (el primero)
+     u32 *used_colors = calloc(numVertices, sizeof(u32));
+     for (u32 i = 0; i < numVertices; i++) // O(3N^2) ~~ O(N^2)
+     {
+         u32 vertex = Orden[i];
+         Color[vertex] = 0; // Inicializamos el color del vertice actual en 0 (el primero)
 
-//         for(u32 j = 0; j < Grado(vertex, G); j++) { // O(N)
-//             u32 neighbor = IndiceVecino(j, vertex, G);
-//             if(Color[neighbor] != MAX_COLOR) {
-//                 used_colors[Color[neighbor]] = i + 1;
-//             }
-//         }
+         for(u32 j = 0; j < Grado(vertex, G); j++) { // O(N)
+             u32 neighbor = IndiceVecino(j, vertex, G);
+             if(Color[neighbor] != MAX_COLOR) {
+                 used_colors[Color[neighbor]] = i + 1;
+             }
+         }
 
-//         u32 color = 0;
-//         while(used_colors[color] > i) // O(r) ~~ O(N)
-//             color++;
+         u32 color = 0;
+         while(used_colors[color] > i) // O(r) ~~ O(N)
+             color++;
 
-//         // Actualizamos el numero de colores utilizados hasta el momento.
-//         Color[vertex] = color;
-//         if(color > maxColors) {
-//             maxColors = color;
-//         }
-//     }
-//     free(used_colors);
-//     // Devolvemos la cantidad de colores utilizados
-//     return maxColors + 1; // +1 porque empezamos desde el 0.
-// }
+         // Actualizamos el numero de colores utilizados hasta el momento.
+         Color[vertex] = color;
+         if(color > maxColors) {
+             maxColors = color;
+         }
+     }
+     free(used_colors);
+     // Devolvemos la cantidad de colores utilizados
+     return maxColors + 1; // +1 porque empezamos desde el 0.
+ }
 
 static int cmp(const void *v1, const void *v2) {
   u32 vfirst = *((u32 *)v1);
@@ -98,51 +98,32 @@ static u32 colorear(u32 v, Grafo G, u32 *Color) {
 // con el que se se coloreo el vertice n-simo del grafo (notar que no nos
 // importan los nombres de los vertices) si color en alguna posicion tiene el
 // valor 0 significa que ese vertice no fue pintado aun
-u32 Greedy(Grafo G, u32 *Orden, u32 *Color) {
-  u32 n = NumeroDeVertices(G);
-  // ya sabemos hasta donde ir coloreando en orden
-  for (u32 index = 0; index < n; ++index) {
-    Color[index] = MAX_COLOR;
-  }
-  u32 max_color = 0;
-  for (u32 index = 0; index < n; ++index) {
-    // cual vamos a ir coloreado:
-    u32 vertice_a_colorear = Orden[index];
-    // tenemos que colorer este vertice con el menor color posible que no tengan
-    // los vecinos
-    u32 nuevo_color = colorear(vertice_a_colorear, G, Color);
-
-    if (nuevo_color == MAX_COLOR) {
-      // fallo colorear
-      return (2 ^ 32) - 1;
-    }
-    if (nuevo_color+1 > max_color) {
-      max_color = nuevo_color+1;
-    }
-    Color[Orden[index]] = nuevo_color;
-  }
-
-  return max_color;
-}
-
-u32 *CMP_COLOR_ARRAY;
-
-int cmpColorByParity(const void *a,
-                     const void *b) { // Primero los impares luego los pares.
-  u32 a_color = CMP_COLOR_ARRAY[*(u32 *)a];
-  u32 b_color = CMP_COLOR_ARRAY[*(u32 *)b];
-  bool a_color_odd = (a_color % 2);
-  bool b_color_odd = (b_color % 2);
-  if (a_color_odd == b_color_odd) // Si ambos tienen la misma paridad, los
-                                  // ordenamos en base a su valor numerico
-    return b_color - a_color;
-  else if (a_color_odd) // Si a es impar y b es par entonces a es menor a b y
-                        // por ende va primero
-    return -1;
-  else // Si a es par y b es impar entonces a es mayor a b y por ende a va
-       // despues de b
-    return 1;
-}
+// u32 Greedy(Grafo G, u32 *Orden, u32 *Color) {
+//   u32 n = NumeroDeVertices(G);
+//   // ya sabemos hasta donde ir coloreando en orden
+//   for (u32 index = 0; index < n; ++index) {
+//     Color[index] = MAX_COLOR;
+//   }
+//   u32 max_color = 0;
+//   for (u32 index = 0; index < n; ++index) {
+//     // cual vamos a ir coloreado:
+//     u32 vertice_a_colorear = Orden[index];
+//     // tenemos que colorer este vertice con el menor color posible que no tengan
+//     // los vecinos
+//     u32 nuevo_color = colorear(vertice_a_colorear, G, Color);
+//
+//     if (nuevo_color == MAX_COLOR) {
+//       // fallo colorear
+//       return (2 ^ 32) - 1;
+//     }
+//     if (nuevo_color+1 > max_color) {
+//       max_color = nuevo_color+1;
+//     }
+//     Color[Orden[index]] = nuevo_color;
+//   }
+//
+//   return max_color;
+// }
 
 u32 contarColores(u32 n, u32 *Color) {
 
@@ -211,43 +192,39 @@ void colorInfoDestroy(struct ColorInfo *ci) {
 }
 
 char OrdenImparPar(u32 n, u32 *Orden, u32 *Color) {
-  // Implementacion mucho mas simple pero nlog(n) igual usa menos memoria
-  CMP_COLOR_ARRAY = Color;
-  qsort(Orden, n, sizeof(u32), cmpColorByParity);
+  // Conseguimos los V_i's, sus cardinales y la cantidad de colores
+  struct ColorInfo *colorInfo = getColorInfo(n, Color);
+
+  u32 k = 0;
+
+  u32 upperOdd;
+  u32 upperEven;
+  if (colorInfo->colorc % 2 == 0) {
+    upperOdd = colorInfo->colorc - 1;
+    upperEven = colorInfo->colorc - 2;
+  } else {
+    upperEven = colorInfo->colorc - 1;
+    upperOdd = colorInfo->colorc - 2;
+  }
+  // Pongo los impares
+  for (u32 j = upperOdd; 0 <= j && j < colorInfo->colorc; j -= 2) {
+    for (u32 i = 0; i < colorInfo->cantidades[j]; ++i) {
+      Orden[k] = colorInfo->V[j][i];
+      ++k;
+    }
+  }
+
+  // Pongo los pares
+  for (u32 j = upperEven; 0 <= j && j < colorInfo->colorc; j -= 2) {
+    for (u32 i = 0; i < colorInfo->cantidades[j]; ++i) {
+      Orden[k] = colorInfo->V[j][i];
+      ++k;
+    }
+  }
+
+  colorInfoDestroy(colorInfo);
+
   return '0';
-  // // Conseguimos los V_i's, sus cardinales y la cantidad de colores
-  // struct ColorInfo *colorInfo = getColorInfo(n, Color);
-  //
-  // u32 k = 0;
-  //
-  // u32 upperOdd;
-  // u32 upperEven;
-  // if (colorInfo->colorc % 2 == 0) {
-  //   upperOdd = colorInfo->colorc - 1;
-  //   upperEven = colorInfo->colorc - 2;
-  // } else {
-  //   upperEven = colorInfo->colorc - 1;
-  //   upperOdd = colorInfo->colorc - 2;
-  // }
-  // // Pongo los impares
-  // for (u32 j = upperOdd; 0 <= j && j < colorInfo->colorc; j -= 2) {
-  //   for (u32 i = 0; i < colorInfo->cantidades[j]; ++i) {
-  //     Orden[k] = colorInfo->V[j][i];
-  //     ++k;
-  //   }
-  // }
-  //
-  // // Pongo los pares
-  // for (u32 j = upperEven; 0 <= j && j < colorInfo->colorc; j -= 2) {
-  //   for (u32 i = 0; i < colorInfo->cantidades[j]; ++i) {
-  //     Orden[k] = colorInfo->V[j][i];
-  //     ++k;
-  //   }
-  // }
-  //
-  // colorInfoDestroy(colorInfo);
-  //
-  // return '0';
 }
 
 // F definida en la spec para el orden jedi
@@ -261,7 +238,7 @@ static u32 *F;
 static int compar(const void *v1, const void *v2) {
   u32 vfirst = *((u32 *)v1);
   u32 vsecond = *((u32 *)v2);
-  if (F[vfirst] < F[vsecond]) {
+  if (F[vfirst] > F[vsecond]) {
     return -1;
   } else if (F[vfirst] == F[vsecond]) {
     return 0;
