@@ -19,6 +19,25 @@ bool checkear_coloreo(Grafo G, u32 *Color) {
   return true;
 }
 
+void probarImparPar(u32 n, u32 *Orden, u32 *Color) {
+  u32 evenyet = 0;
+  if(Color[Orden[n-1]] != 0) {
+    printf("Troll el ultimo no es 0, es %u\n", Color[Orden[n-1]]);
+    exit(0);
+  }
+
+  for (u32 i = 0; i < n; i++) {
+    evenyet = evenyet || Color[Orden[i]] % 2 == 0;
+    
+    if(evenyet && Color[Orden[i]] % 2 != 0) {
+      printf("Troll paridad\n");
+      exit(0);
+    }
+    
+  }
+  
+}
+
 int main() {
   Grafo g = ConstruirGrafo();
   // DestruirGrafo(g);

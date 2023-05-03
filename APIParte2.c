@@ -2,7 +2,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "APIG23.h"
 #include "APIParte2.h"
 
 
@@ -224,7 +223,7 @@ char OrdenImparPar(u32 n, u32 *Orden, u32 *Color) {
 
   colorInfoDestroy(colorInfo);
 
-  return '0';
+  return 0;
 }
 
 // F definida en la spec para el orden jedi
@@ -265,7 +264,7 @@ char OrdenJedi(Grafo G, u32 *Orden, u32 *Color) {
   }
   // Computamos el x * sumatoria
   for (u32 i = 0; i < colorInfo->colorc; ++i) {
-    F[i] *= Color[i];
+    F[i] *= i;
   }
 
   // inicializo ordenColores
@@ -289,5 +288,5 @@ char OrdenJedi(Grafo G, u32 *Orden, u32 *Color) {
   free(F);
   F = NULL; // Dejo F como NULL para proximas iteraciones
 
-  return '0';
+  return 0;
 }
