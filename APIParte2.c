@@ -57,39 +57,25 @@ static int cmp(const void *v1, const void *v2) {
     return 1;
 }
 
-static u32 colorear(u32 v, Grafo G, u32 *Color) {
+static u32 colorear(u32 * coloresUsados, u32 umbral, u32 v, Grafo G, u32 *Color) {
   // creemos la lista de colores que tiene cada vecino
   if (Grado(v, G) == 0) {
     // no tiene vecinos
-    return 1;
-  }
-  u32 *color_vecinos = calloc(Grado(v, G), sizeof(u32));
-  if (color_vecinos == NULL) {
-    return MAX_COLOR;
+    return 0;
   }
   for (u32 index = 0; index < Grado(v, G); ++index) {
-    color_vecinos[index] = Color[IndiceVecino(index, v, G)];
-  }
-  qsort(color_vecinos, Grado(v, G), sizeof(u32), cmp);
-  // busquemos el primer espacio libre, si no hay ningun coloreamos con un nuevo
-  // color xdnt
-  u32 color_actual = -1;
-  for (u32 index = 0; index < Grado(v, G); ++index) {
-    if (color_vecinos[index] != MAX_COLOR) {
-      if (color_actual + 1 <
-          color_vecinos[index]) { // si el color que estoy apuntando es por mas
-                                  // de 1 mayor al anterior pues tengo un hueco,
-                                  // osea mi primer colo dispobible
-        free(color_vecinos);
-        return color_actual + 1;
-      } else {
-        color_actual = color_vecinos[index];
-      }
+    if(Color[IndiceVecino(index, v, G)] != MAX_COLOR){
+      coloresUsados[Color[IndiceVecino(index, v, G)]] = umbral;
     }
   }
-  free(color_vecinos);
+  for (u32 index = 0; index < NumeroDeVertices(G)+2; ++index) {
+    if (coloresUsados[index] < umbral) {
+        return index;
+    } 
+  }
+  printf("fallo en colorear, se usaron mas de delta + 1\n");
+  return MAX_COLOR;
   // si terminamos es por que no habia hueco, necesitamos un nuevo color
-  return color_actual + 1;
 }
 
 // en Orden vienen especificados una serie de vertices ordenados a colorear.
@@ -97,32 +83,35 @@ static u32 colorear(u32 v, Grafo G, u32 *Color) {
 // con el que se se coloreo el vertice n-simo del grafo (notar que no nos
 // importan los nombres de los vertices) si color en alguna posicion tiene el
 // valor 0 significa que ese vertice no fue pintado aun
-// u32 Greedy(Grafo G, u32 *Orden, u32 *Color) {
-//   u32 n = NumeroDeVertices(G);
-//   // ya sabemos hasta donde ir coloreando en orden
-//   for (u32 index = 0; index < n; ++index) {
-//     Color[index] = MAX_COLOR;
-//   }
-//   u32 max_color = 0;
-//   for (u32 index = 0; index < n; ++index) {
-//     // cual vamos a ir coloreado:
-//     u32 vertice_a_colorear = Orden[index];
-//     // tenemos que colorer este vertice con el menor color posible que no tengan
-//     // los vecinos
-//     u32 nuevo_color = colorear(vertice_a_colorear, G, Color);
-//
-//     if (nuevo_color == MAX_COLOR) {
-//       // fallo colorear
-//       return (2 ^ 32) - 1;
-//     }
-//     if (nuevo_color+1 > max_color) {
-//       max_color = nuevo_color+1;
-//     }
-//     Color[Orden[index]] = nuevo_color;
-//   }
-//
-//   return max_color;
-// }
+u32 Greedy2(Grafo G, u32 *Orden, u32 *Color) {
+  u32 n = NumeroDeVertices(G);
+  // ya sabemos hasta donde ir coloreando en orden
+  for (u32 index = 0; index < n; ++index) {
+    Color[index] = MAX_COLOR;
+  }
+  u32 max_color = 0;
+  u32 * coloresUsados = calloc(NumeroDeVertices(G)+1, sizeof(u32)); 
+  u32 umbralUsados = 0;
+  for (u32 index = 0; index < n; ++index) {
+    // cual vamos a ir coloreado:
+    u32 vertice_a_colorear = Orden[index];
+    // tenemos que colorer este vertice con el menor color posible que no tengan
+    // los vecinos
+    umbralUsados++;
+    u32 nuevo_color = colorear(coloresUsados, umbralUsados, vertice_a_colorear, G, Color);
+
+    if (nuevo_color == MAX_COLOR) {
+      // fallo colorear
+      return (2 ^ 32) - 1;
+    }
+    if (nuevo_color+1 > max_color) {
+      max_color = nuevo_color+1;
+    }
+    Color[Orden[index]] = nuevo_color;
+  }
+
+  return max_color;
+}
 
 u32 contarColores(u32 n, u32 *Color) {
 
