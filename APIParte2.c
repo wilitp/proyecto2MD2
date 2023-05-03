@@ -6,74 +6,22 @@
 
 
 #define MAX_COLOR __UINT32_MAX__
-//tomi
- u32 Greedy(Grafo G, u32 *Orden, u32 *Color)
- {
-     u32 maxColors = 0;
-     const u32 numVertices = NumeroDeVertices(G);
-     // const u32* indices = Indices(G);
-
-     // Iteramos sobre cada uno de los vertices en el orden dado
-     for(u32 i = 0; i < numVertices; i++) {
-         Color[i] = MAX_COLOR;
-     }
-
-     u32 *used_colors = calloc(numVertices, sizeof(u32));
-     for (u32 i = 0; i < numVertices; i++) // O(3N^2) ~~ O(N^2)
-     {
-         u32 vertex = Orden[i];
-         Color[vertex] = 0; // Inicializamos el color del vertice actual en 0 (el primero)
-
-         for(u32 j = 0; j < Grado(vertex, G); j++) { // O(N)
-             u32 neighbor = IndiceVecino(j, vertex, G);
-             if(Color[neighbor] != MAX_COLOR) {
-                 used_colors[Color[neighbor]] = i + 1;
-             }
-         }
-
-         u32 color = 0;
-         while(used_colors[color] > i) // O(r) ~~ O(N)
-             color++;
-
-         // Actualizamos el numero de colores utilizados hasta el momento.
-         Color[vertex] = color;
-         if(color > maxColors) {
-             maxColors = color;
-         }
-     }
-     free(used_colors);
-     // Devolvemos la cantidad de colores utilizados
-     return maxColors + 1; // +1 porque empezamos desde el 0.
- }
-
-static int cmp(const void *v1, const void *v2) {
-  u32 vfirst = *((u32 *)v1);
-  u32 vsecond = *((u32 *)v2);
-  if (vfirst < vsecond) {
-    return -1;
-  } else if (vfirst == vsecond) {
-    return 0;
-  } else
-    return 1;
-}
 
 static u32 colorear(u32 * coloresUsados, u32 umbral, u32 v, Grafo G, u32 *Color) {
-  // creemos la lista de colores que tiene cada vecino
   if (Grado(v, G) == 0) {
     // no tiene vecinos
     return 0;
   }
   for (u32 index = 0; index < Grado(v, G); ++index) {
     if(Color[IndiceVecino(index, v, G)] != MAX_COLOR){
-      coloresUsados[Color[IndiceVecino(index, v, G)]] = umbral;
+      coloresUsados[Color[IndiceVecino(index, v, G)]] = umbral + 1;
     }
   }
-  for (u32 index = 0; index < NumeroDeVertices(G)+2; ++index) {
-    if (coloresUsados[index] < umbral) {
+  for (u32 index = 0; index < NumeroDeVertices(G); ++index) {
+    if (coloresUsados[index] <= umbral) {
         return index;
     } 
   }
-  printf("fallo en colorear, se usaron mas de delta + 1\n");
   return MAX_COLOR;
   // si terminamos es por que no habia hueco, necesitamos un nuevo color
 }
@@ -82,23 +30,21 @@ static u32 colorear(u32 * coloresUsados, u32 umbral, u32 v, Grafo G, u32 *Color)
 // precon estan desde el 1 hasta n en Color en el indice n-simo esta el color
 // con el que se se coloreo el vertice n-simo del grafo (notar que no nos
 // importan los nombres de los vertices) si color en alguna posicion tiene el
-// valor 0 significa que ese vertice no fue pintado aun
-u32 Greedy2(Grafo G, u32 *Orden, u32 *Color) {
+// valor MAX_COLOR significa que ese vertice no fue pintado aun
+u32 Greedy(Grafo G, u32 *Orden, u32 *Color) {
   u32 n = NumeroDeVertices(G);
   // ya sabemos hasta donde ir coloreando en orden
   for (u32 index = 0; index < n; ++index) {
     Color[index] = MAX_COLOR;
   }
   u32 max_color = 0;
-  u32 * coloresUsados = calloc(NumeroDeVertices(G)+1, sizeof(u32)); 
-  u32 umbralUsados = 0;
+  u32 * coloresUsados = calloc(NumeroDeVertices(G), sizeof(u32)); 
   for (u32 index = 0; index < n; ++index) {
     // cual vamos a ir coloreado:
     u32 vertice_a_colorear = Orden[index];
     // tenemos que colorer este vertice con el menor color posible que no tengan
     // los vecinos
-    umbralUsados++;
-    u32 nuevo_color = colorear(coloresUsados, umbralUsados, vertice_a_colorear, G, Color);
+    u32 nuevo_color = colorear(coloresUsados, index, vertice_a_colorear, G, Color);
 
     if (nuevo_color == MAX_COLOR) {
       // fallo colorear
@@ -152,9 +98,13 @@ struct ColorInfo *getColorInfo(u32 n, u32 *Color) {
     ++(colorInfo->cantidades[Color[i]]);
   }
 
-  // hago espacio para cada V_i
-  for (u32 i = 0; i < colorInfo->colorc; ++i) {
-    colorInfo->V[i] = malloc(colorInfo->cantidades[i] * (sizeof(u32)));
+  // hago espacio para los V_i
+  colorInfo->V[0] = malloc(n * sizeof(u32));
+  u32 *nextV = colorInfo->V[0] + colorInfo->cantidades[0];
+  // Los pongo uno seguido del otro
+  for (u32 i = 1; i < colorInfo->colorc; ++i) {
+    colorInfo->V[i] = nextV;
+    nextV = colorInfo->V[i] + colorInfo->cantidades[i];
   }
 
   u32 *contadores = calloc((colorInfo->colorc), sizeof(u32));
@@ -172,9 +122,9 @@ struct ColorInfo *getColorInfo(u32 n, u32 *Color) {
 }
 
 void colorInfoDestroy(struct ColorInfo *ci) {
-  for (u32 i = 0; i < ci->colorc; ++i) {
-    free(ci->V[i]);
-  }
+  // for (u32 i = 0; i < ci->colorc; ++i) {
+  //   free(ci->V[i]);
+  // }
   free(ci->cantidades);
   free(ci->V);
 }

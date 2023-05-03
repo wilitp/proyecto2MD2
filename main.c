@@ -1,3 +1,9 @@
+
+// INTEGRANTES
+// Alejo Corral alejo.corral@mi.unc.edu.ar
+// Ignacion Martinez  ignacio.martinez.goloboff@mi.unc.edu.ar
+// Guillermo de Ipola guillermo.ipola@mi.unc.edu.ar
+
 #include "APIG23.h"
 #include "APIParte2.h"
 #include "stdio.h"
@@ -67,7 +73,7 @@ int main() {
 
   for (u32 i = 1; i <= 500; ++i) {
     if (i % 16 == 0) {
-      printf("Alternando estrategias \n\n");
+      // printf("Alternando estrategias \n\n");
       u32 *aux;
       aux = orden1;
       orden1 = orden;
@@ -90,7 +96,7 @@ int main() {
       exit(0);
     } else {
       colorcJedi = colorcJediNuevo;
-      printf("Estrategia 1: %u colores\n", colorcJedi);
+      // printf("Estrategia 1: %u colores\n", colorcJedi);
     }
 
     OrdenImparPar(NumeroDeVertices(g), orden1, color1);
@@ -100,9 +106,11 @@ int main() {
       exit(0);
     } else {
       colorcImp = colorcImpNuevo;
-      printf("Estrategia 2: %u colores\n", colorcImp);
+      // printf("Estrategia 2: %u colores\n", colorcImp);
     }
   }
+
+  printf("X(G) ~ %u\n", colorcImp < colorcJedi ? colorcImp : colorcJedi);
 
   DestruirGrafo(g);
   return 0;
