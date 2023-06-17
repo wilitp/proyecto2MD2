@@ -7,6 +7,13 @@
 
 #define MAX_COLOR __UINT32_MAX__
 
+
+struct FItem {
+  u32 color;
+  u32 value; 
+};
+
+
 static u32 colorear(u32 * coloresUsados, u32 umbral, u32 v, Grafo G, u32 *Color) {
   if (Grado(v, G) == 0) {
     // no tiene vecinos
@@ -168,17 +175,28 @@ char OrdenImparPar(u32 n, u32 *Orden, u32 *Color) {
 // F definida en la spec para el orden jedi
 // Tuve que hacerla variable global porq qsort_r no esta permitida en c99 (y los
 // profes compilan con ese standard)
-static u32 *F;
 
 // Comparador para ordenar V_i's en el orden Jedi
 // Asume que cuando se la llama F ya esta inicializada ya punta a un lugar de
 // memoria valido
+// static int compar(const void *v1, const void *v2) {
+//   u32 vfirst = *((u32 *)v1);
+//   u32 vsecond = *((u32 *)v2);
+//   if (F[vfirst] > F[vsecond]) {
+//     return -1;
+//   } else if (F[vfirst] == F[vsecond]) {
+//     return 0;
+//   } else
+//     return 1;
+// }
+
 static int compar(const void *v1, const void *v2) {
-  u32 vfirst = *((u32 *)v1);
-  u32 vsecond = *((u32 *)v2);
-  if (F[vfirst] > F[vsecond]) {
+  struct FItem *vfirst = (struct FItem *) v1;
+  struct FItem *vsecond = (struct FItem *) v2;
+
+  if (vfirst->value > vsecond->value) {
     return -1;
-  } else if (F[vfirst] == F[vsecond]) {
+  } else if (vfirst->value == vsecond->value) {
     return 0;
   } else
     return 1;
@@ -186,38 +204,43 @@ static int compar(const void *v1, const void *v2) {
 
 // ordena indices en la forma especial dada en las especificaciones
 char OrdenJedi(Grafo G, u32 *Orden, u32 *Color) {
+  struct FItem *F;
 
-  assert(F == NULL);
   // Conseguimos los V_i's, sus cardinales y la cantidad de colores
   struct ColorInfo *colorInfo = getColorInfo(NumeroDeVertices(G), Color);
 
   // Orden de los colores segun F
-  u32 *ordenColores = malloc((colorInfo->colorc) * sizeof(u32));
+  // u32 *ordenColores = malloc((colorInfo->colorc) * sizeof(u32));
 
   // Funcion F de la spec
-  F = calloc(colorInfo->colorc, sizeof(u32));
+  F = calloc(colorInfo->colorc, sizeof(struct FItem));
 
   // Computamos las sumatorias de F
   for (u32 i = 0; i < NumeroDeVertices(G); ++i) {
-    F[Color[i]] += Grado(i, G);
+    F[Color[i]].value += Grado(i, G);
   }
   // Computamos el x * sumatoria
+  // Dejamos asentado el color(una vez que los ordenemos, el orden va a dejar de decirnos el color original)
   for (u32 i = 0; i < colorInfo->colorc; ++i) {
-    F[i] *= i;
+    F[i].value *= i;
+    F[i].color = i;
   }
 
   // inicializo ordenColores
-  for (u32 i = 0; i < colorInfo->colorc; ++i) {
-    ordenColores[i] = i;
-  }
+  // for (u32 i = 0; i < colorInfo->colorc; ++i) {
+  //   ordenColores[i] = i;
+  // }
 
   // Ordeno los V_i's segun F
-  qsort(ordenColores, colorInfo->colorc, sizeof(u32), compar);
+  qsort(F, colorInfo->colorc, sizeof(struct FItem), compar);
 
-  // Usando ordenColores y cantidades, aplano V para obtener el Orden Jedi
+  // Usando F y cantidades, aplano V para obtener el Orden Jedi
+  // k = orden del siguiente nodo
+  // j = orden del siguiente color a aplanar
+  // i = orden del siguiente nodo en el color actual a poner en Orden
   for (u32 j = 0, k = 0; j < colorInfo->colorc; ++j) {
-    for (u32 i = 0; i < colorInfo->cantidades[ordenColores[j]]; ++i) {
-      Orden[k] = colorInfo->V[ordenColores[j]][i];
+    for (u32 i = 0; i < colorInfo->cantidades[F[j].color]; ++i) {
+      Orden[k] = colorInfo->V[F[j].color][i];
       ++k;
     }
   }
